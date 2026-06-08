@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS fato_vendas (
     estado VARCHAR(2),
     bairro VARCHAR(100),
     venda_em_feriado BOOLEAN,
-    minutos_assistidos INT,
-    acessos INT
+    horas_assistidas DECIMAL(10, 2),
+    tickets_suporte INT,
+    nps_score INT
 );
