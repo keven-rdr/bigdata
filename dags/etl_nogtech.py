@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 import re
 import numpy as np
+import time
 
 # ==========================================
 # FUNÇÕES AUXILIARES DE TRANSFORMAÇÃO
@@ -14,20 +15,53 @@ import numpy as np
 def limpar_mascarar_cpf(cpf):
     """Remove pontuação e aplica máscara LGPD"""
     cpf_limpo = re.sub(r'\D', '', str(cpf)).zfill(11)
-    return f"*.{cpf_limpo[3:6]}.{cpf_limpo[6:9]}-**"
+    return f"***.{cpf_limpo[3:6]}.{cpf_limpo[6:9]}-**"
+
+def requisitar_brasilapi(url, descricao, tentativas=3, timeout=5):
+    """Executa chamada HTTP com retry simples para falhas temporarias."""
+    for tentativa in range(1, tentativas + 1):
+        try:
+            response = requests.get(url, timeout=timeout)
+            if response.status_code == 200:
+                return response
+
+            if response.status_code < 500 and response.status_code != 429:
+                print(f"BrasilAPI retornou status {response.status_code} para {descricao}")
+                return response
+
+            print(f"Tentativa {tentativa}/{tentativas} falhou para {descricao}: status {response.status_code}")
+        except requests.RequestException as e:
+            print(f"Tentativa {tentativa}/{tentativas} falhou para {descricao}: {e}")
+
+        if tentativa < tentativas:
+            time.sleep(2)
+
+    return None
 
 def buscar_cep(cep, cache_cep):
     """Busca CEP na BrasilAPI utilizando cache local"""
-    cep_limpo = re.sub(r'\D', '', str(cep))
-    if not cep_limpo or cep_limpo == 'nan':
+    resultado_vazio = {'cidade': None, 'estado': None, 'bairro': None}
+
+    if pd.isna(cep):
+        return resultado_vazio
+
+    cep_texto = str(cep).strip()
+    if re.fullmatch(r'\d+\.0', cep_texto):
+        cep_texto = cep_texto[:-2]
+
+    cep_limpo = re.sub(r'\D', '', cep_texto).zfill(8)
+    if not cep_limpo or len(cep_limpo) != 8:
         return {'cidade': None, 'estado': None, 'bairro': None}
         
     if cep_limpo in cache_cep:
         return cache_cep[cep_limpo]
     
     try:
-        response = requests.get(f"https://brasilapi.com.br/api/cep/v2/{cep_limpo}", timeout=5)
-        if response.status_code == 200:
+        response = requisitar_brasilapi(
+            f"https://brasilapi.com.br/api/cep/v2/{cep_limpo}",
+            f"CEP {cep_limpo}"
+        )
+        if response and response.status_code == 200:
             data = response.json()
             resultado = {
                 'cidade': data.get('city'),
@@ -39,7 +73,8 @@ def buscar_cep(cep, cache_cep):
     except Exception as e:
         print(f"Erro ao buscar CEP {cep_limpo}: {e}")
     
-    return {'cidade': None, 'estado': None, 'bairro': None}
+    cache_cep[cep_limpo] = resultado_vazio
+    return resultado_vazio
 
 def verificar_feriado(data_str, cache_feriados):
     """Verifica se a data é feriado consultando a BrasilAPI por ano"""
@@ -52,8 +87,11 @@ def verificar_feriado(data_str, cache_feriados):
 
     if ano not in cache_feriados:
         try:
-            response = requests.get(f"https://brasilapi.com.br/api/feriados/v1/{ano}", timeout=5)
-            if response.status_code == 200:
+            response = requisitar_brasilapi(
+                f"https://brasilapi.com.br/api/feriados/v1/{ano}",
+                f"feriados do ano {ano}"
+            )
+            if response and response.status_code == 200:
                 cache_feriados[ano] = [f['date'] for f in response.json()]
             else:
                 cache_feriados[ano] = []
@@ -181,6 +219,7 @@ with DAG(
     default_args=default_args,
     schedule_interval='@daily',
     catchup=False,
+    max_active_runs=1,
     description='Pipeline ETL da NogTech com integrações BrasilAPI'
 ) as dag:
 
