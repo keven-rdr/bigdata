@@ -1,10 +1,27 @@
-# Pipeline ETL NogTech com Apache Airflow
+# <p align="center">Pipeline ETL NogTech com Apache Airflow</p>
+<p align="center">
+  <strong>Projeto Final Disciplina de Práticas Profissionais em Big Data</strong><br>
+  7° Periodo | Engenharia de Software | Unicatólica-TO
+</p>
 
-Projeto desenvolvido para a disciplina **Práticas Profissionais em Big Data**.
-* Integrantes: João Victor Ferreira Costa, Eville Vitória Nunes Coelho, Fernanda Galvão Marçal e Keven Lucas Rodrigues.
+## Integrantes
+- João Victor Ferreira Costa
+- Eville Vitória Nunes Coelho
+- Fernanda Galvão Marçal
+- Keven Lucas Rodrigues
 
+## Descrição do Projeto
 O objetivo deste projeto é implementar um pipeline de ETL orquestrado com **Apache Airflow**, integrando arquivos locais com dados externos da **BrasilAPI**, realizando tratamento, enriquecimento, anonimização e carga final em banco de dados PostgreSQL.
 
+## Integração com Dashboard Analítico
+
+Os dados da camada fato gerados, enriquecidos e anonimizados por este pipeline ETL são consumidos por uma aplicação web exclusiva. 
+
+Para fornecer à diretoria da NogTech uma interface interativa com as métricas de vendas, engajamento e distribuição geográfica, o front-end foi isolado em um ecossistema próprio desenvolvido com **Next.js**, **Tailwind CSS** e **Recharts**.
+
+Para visualizar o código-fonte, a documentação estrutural e a interface do painel, acesse o repositório dedicado clicando no botão abaixo:
+
+[![Acessar Repositório do Dashboard](https://img.shields.io/badge/Acessar_Repositório-Dashboard_NogTech-2563EB?style=for-the-badge&logo=github&logoColor=white)](https://github.com/joao-fcosta/painel-nogtech)
 
 ---
 
