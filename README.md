@@ -1,8 +1,10 @@
 # Pipeline ETL NogTech com Apache Airflow
 
 Projeto desenvolvido para a disciplina **Práticas Profissionais em Big Data**.
+* Integrantes: João Victor Ferreira Costa, Eville Vitória Nunes Coelho, Fernanda Galvão Marçal e Keven Lucas Rodrigues.
 
 O objetivo deste projeto é implementar um pipeline de ETL orquestrado com **Apache Airflow**, integrando arquivos locais com dados externos da **BrasilAPI**, realizando tratamento, enriquecimento, anonimização e carga final em banco de dados PostgreSQL.
+
 
 ---
 
